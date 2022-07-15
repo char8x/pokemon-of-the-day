@@ -1,0 +1,25 @@
+name: flat
+on:
+  schedule:
+    - cron: "0 0 1 * *" # run once a month
+  workflow_dispatch: {}
+  push:
+    paths:
+      - .github/workflows/flat.yml # Only run a new workflow every time this file (flat.yaml) file changes
+      - ./postprocess.ts
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Fetch data
+        uses: githubocto/flat@v3
+        with:
+          http_url: https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon.csv
+          downloaded_filename: all-pokemon.csv # The http_url gets saved and renamed in our repository as this file
+          postprocess: ./postprocess.ts # A postprocessing javascript or typescript file written in Deno
